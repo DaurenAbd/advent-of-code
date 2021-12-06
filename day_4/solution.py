@@ -29,8 +29,7 @@ class Board:
 
 def read_input() -> Tuple[List[Ball], List[Board]]:
     with open('input.txt', 'r') as reader:
-        raw_lines = reader.readlines()
-        stripped_lines = map(lambda line: line.strip(), raw_lines)
+        stripped_lines = map(lambda line: line.strip(), reader.readlines())
         non_empty_lines = filter(lambda line: line, stripped_lines)
         lines = list(non_empty_lines)
 
