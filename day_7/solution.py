@@ -1,4 +1,5 @@
 import collections
+from dataclasses import dataclass
 from typing import List
 
 
@@ -7,41 +8,48 @@ def read_input() -> List[int]:
         return [int(num) for num in reader.readline().split(',')]
 
 
+@dataclass(order=True)
+class CrabGroup1:
+    position: int
+    count: int
+
+    def add(self, count: int):
+        self.count += count
+
+    def move(self, position: int) -> int:
+        move_cost = abs(self.position - position) * self.count
+        self.position = position
+        return move_cost
+
+
 def task1(positions: List[int]) -> int:
     counter = collections.Counter(positions)
-    crabs = [(k, v) for k, v in counter.items()]
+    crabs = [CrabGroup1(position, count) for position, count in counter.items()]
     crabs.sort()
     n = len(crabs)
 
-    right = 0
-    right_count = 0
+    right_group = CrabGroup1(crabs[n - 1].position, 0)
+    right_costs = [0] * (n + 1)
+
+    for i in reversed(range(n)):
+        right_costs[i] = right_costs[i + 1] + right_group.move(crabs[i].position)
+        right_group.add(crabs[i].count)
+
+    left_group = CrabGroup1(crabs[0].position, 0)
+    left_costs = [0] * n
+
     for i in range(1, n):
-        right += (crabs[i][0] - crabs[0][0]) * crabs[i][1]
-        right_count += crabs[i][1]
+        left_group.add(crabs[i - 1].count)
+        left_costs[i] = left_costs[i - 1] + left_group.move(crabs[i].position)
 
-    left = 0
-    left_count = crabs[0][1]
-    answer = left + right
-
-    for i in range(1, n):
-        pos_diff = crabs[i][0] - crabs[i - 1][0]
-
-        left += left_count * pos_diff
-        left_count += crabs[i][1]
-
-        right -= right_count * pos_diff
-        right_count -= crabs[i][1]
-
-        answer = min(answer, left + right)
-
-    return answer
+    return min(left_costs[i] + right_costs[i] for i in range(n))
 
 
-class CrabGroup:
-    def __init__(self, count: int):
-        self.count = count
-        self.bias = 0
-        self.cost = 1
+@dataclass(order=True)
+class CrabGroup2:
+    count: int
+    bias: int = 0
+    cost: int = 1
 
     def add(self, count: int):
         self.bias += (self.cost - 1) * self.count
@@ -58,14 +66,14 @@ def task2(positions: List[int]) -> int:
     counter = collections.Counter(positions)
     L, R = min(counter.keys()), max(counter.keys())
 
-    left_group = CrabGroup(0)
+    left_group = CrabGroup2(0)
     left_costs = collections.Counter()
 
     for i in range(L, R + 1):
         left_costs[i] = left_costs[i - 1] + left_group.move()
         left_group.add(counter[i])
 
-    right_group = CrabGroup(0)
+    right_group = CrabGroup2(0)
     right_costs = collections.Counter()
 
     for i in range(R, L - 1, -1):
@@ -76,4 +84,5 @@ def task2(positions: List[int]) -> int:
 
 
 if __name__ == '__main__':
+    print(task1(read_input()))
     print(task2(read_input()))
