@@ -86,7 +86,9 @@ class State:
         if cave.is_small():
             if self.visit_count[cave] == 2:
                 self.twice_visited_small_cave = cave
-            self.update_hash(1 << cave.id)
+                self.update_hash()
+            else:
+                self.update_hash(1 << cave.id)
         else:
             self.update_hash()
 
@@ -96,7 +98,9 @@ class State:
         if cave.is_small():
             if self.visit_count[cave] == 1:
                 self.twice_visited_small_cave = None
-            self.update_hash(-(1 << cave.id))
+                self.update_hash()
+            else:
+                self.update_hash(-(1 << cave.id))
         else:
             self.update_hash()
 
